@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html lang="en" ng-app="myApp" class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>My AngularJS App</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="components/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="components/css/landing-page.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet"
+          type="text/css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="bower_components/html5-boilerplate/css/normalize.css">
+    <link rel="stylesheet" href="bower_components/html5-boilerplate/css/main.css">
+    <link rel="stylesheet" href="app.css">
+</head>
+<body ng-controller="PlayerSearchController as Search">
+
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-fixed-top topnav" role="navigation">
+    <div class="container topnav">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand topnav" href="#">About</a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#contact">Contact</a>
+                </li>
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+
+<!-- Header -->
+<a name="about"></a>
+
+<div class="intro-header">
+    <div class="container">
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="intro-message">
+                    <h1>Match History Search</h1>
+
+                    <h3>Enter your Summoner Name to Start</h3>
+
+                    <form name="Summer Name Input" ng-submit="Search.summoner_info_lookup(player_name)">
+                        <div class="input-group">
+                          <span class="input-group-btn">
+                            <button class="btn btn-default" type="submit" ng-click="document.getElementById('marker').scrollIntoView();">Go!</button>
+                          </span>
+                            <input type="text" class="form-control" placeholder="Search for..." ng-model="player_name" tabindex="1">
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /.container -->
+
+</div>
+
+
+<div class="container">
+     <div class="modal fade bs-champion-page-load-modal" tabindex="-1" aria-hidden="true"
+         style="position: relative;" id="loading_bar">
+        <div class="modal-dialog modal-lg">
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45"
+                     aria-valuemin="0" aria-valuemax="100" style="width: 100%;">
+                    <span class="sr-only">100% Complete</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-show="Search.match_history" id="match_history_chart">
+        <h2>{{ player_name }}'s Last Ten Matches</h2>
+        <table class="table table-bordered table-responsive">
+            <thead>
+                <tr>
+                    <th data-field="playerChampion" data-align="left">Champion</th>
+                    <th data-field="matchMode" data-radio="true">Match Mode</th>
+                    <th data-field="matchDuration" data-align="right">Match Duration</th>
+                    <th data-field="matchCreation" data-align="left">Mate Date</th>
+                </tr>
+            </thead>
+            <tbody id="match_history_chart_content">
+                <tr ng-repeat="match in Search.match_history | orderBy: match.matchDuration" ng-class="{'btn-success': match.participants[0].stats.winner, 'btn-danger': !match.participants[0].stats.winner}" ng-click="Search.match_detail_pull(match.matchId, match.participants[0].championId)">
+                    <td>
+                        {{ match.participants[0].championId }}
+                    </td>
+                    <td>
+                        {{ match.matchMode }}
+                    </td>
+                    <td>
+                        {{ match.matchDuration }} Minutes
+                    </td>
+                    <td>
+                        {{ match.matchCreation|date }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+<div id="marker">
+
+</div>
+
+    </div>
+
+</div>
+<!-- /.banner -->
+<div class="container" ng-show="Search.match_detail_info" id="player_stats_container">
+    <div class="col-lg-6">
+        <h3 style="color: red;"> Red Team Stats <small ng-show="Search.red_team[0].stats.winner">WINNER</small></h3>
+        <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Champion</th>
+                <th>K/D/A</th>
+                <th>Largest Spree</th>
+                <th>Damage Dealt P/M/T</th>
+                <th>Damage Taken P/M/T</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="player in Search.red_team" ng-class="{'main-character': player.mainCharacter}" ng-click="Search.player_to_player_compare('redTeam', player.participantId)">
+                <td>
+                    {{ player.championName }}
+                </td>
+                <td>
+                    {{ player.stats.kills }}/{{ player.stats.deaths }}/{{ player.stats.assists }}
+                </td>
+                <td>
+                    {{ player.stats.largestKillingSpree }}
+                </td>
+                <td>
+                    <span style="color: red;">{{ player.stats.physicalDamageDealt }}</span>/<span style="color: blue;">{{ player.stats.magicDamageDealt }}</span>/<span style="color: #008000">{{ player.stats.trueDamageDealt }}</span>
+                </td>
+                <td>
+                    <span style="color: red;">{{ player.stats.physicalDamageDealtToChampions }}</span>/<span style="color: blue;">{{ player.stats.magicDamageDealtToChampions }}</span>/<span style="color: #008000">{{ player.stats.trueDamageDealtToChampions }}</span>
+                </td>
+
+            </tr>
+        </tbody>
+    </table>
+    </div>
+    <div class="col-lg-6">
+        <h3 style="color: blue;"> Blue Team Stats <small ng-show="Search.blue_team[0].stats.winner">WINNER</small></h3>
+        <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Champion</th>
+                <th>K/D/A</th>
+                <th>Largest Spree</th>
+                <th>Damage Dealt P/M/T</th>
+                <th>Damage Taken P/M/T</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="player in Search.blue_team" ng-class="{'main-character': player.mainCharacter}" ng-click="Search.player_to_player_compare('blueTeam', player.participantId)">
+                <td>
+                    {{ player.championName }}
+                </td>
+                <td>
+                    {{ player.stats.kills }}/{{ player.stats.deaths }}/{{ player.stats.assists }}
+                </td>
+                <td>
+                    {{ player.stats.largestKillingSpree }}
+                </td>
+                <td>
+                    <span style="color: red;">{{ player.stats.physicalDamageDealt }}</span>/<span style="color: blue;">{{ player.stats.magicDamageDealt }}</span>/<span style="color: #008000">{{ player.stats.trueDamageDealt }}</span>
+                </td>
+                <td>
+                    <span style="color: red;">{{ player.stats.physicalDamageDealtToChampions }}</span>/<span style="color: blue;">{{ player.stats.magicDamageDealtToChampions }}</span>/<span style="color: #008000">{{ player.stats.trueDamageDealtToChampions }}</span>
+                </td>
+
+            </tr>
+        </tbody>
+    </table>
+    </div>
+
+</div>
+<!-- Footer -->
+
+<div class="container">
+
+</div>
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <ul class="list-inline">
+                    <li>
+                        <a href="#">Home</a>
+                    </li>
+                    <li class="footer-menu-divider">&sdot;</li>
+                    <li>
+                        <a href="#about">About</a>
+                    </li>
+                    <li>
+                        <a href="#contact">Contact</a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+        <div class="row">
+            lolbigdata.info isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or
+            anyone
+            officially involved in producing or managing League of Legends. League of Legends and Riot Games are
+            trademarks or
+            registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.
+        </div>
+    </div>
+
+</footer>
+
+
+
+<!-- Bootstrap Core JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<script src="bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js"></script>
+<script src="components/js/bootstrap.min.js"></script>
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/angular-route/angular-route.js"></script>
+<script src="app.js"></script>
+<script src="view1/view1.js"></script>
+<script src="view2/view2.js"></script>
+<script src="components/version/version.js"></script>
+<script src="components/version/version-directive.js"></script>
+<script src="components/version/interpolate-filter.js"></script>
+
+<script>
+    $(document).ready(function(){
+        $('#data_container').accordion({
+          collapsible: true
+        });
+    });
+</script>
+</body>
+</html>
